@@ -57,15 +57,11 @@ def main():
     
     files = get_ics_files(ns.directory)
 
-    sys.stderr.write("==> Found {count} ics files\n".format(count=len(files)))
-
     for file in files:
         sys.stdout.write("= {activity} =\n".format(activity=file.split('.ics')[0]))
         projects = get_events_from_ics(ns.directory+"/"+file)
         for name, length in projects.iteritems():
             sys.stdout.write("{name}: {length}\n".format(name=name, length=format_timedelta(length['total'])))
-
-    #sys.stdout.write(geojson_dumps(collection))
 
 
 if __name__ == '__main__':
