@@ -86,7 +86,10 @@ def main():
     if ns.from_date and ns.to_date:
         t = timezone(ns.timezone)
         from_date = t.localize(ns.from_date)
-        to_date = t.localize(ns.to_date)    
+        to_date = t.localize(ns.to_date)
+    else:
+        from_date = None
+        to_date = None
 
     files = get_ics_files(ns.directory)
 
