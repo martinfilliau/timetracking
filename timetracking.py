@@ -53,7 +53,10 @@ def format_timedelta(delta):
     seconds = delta.total_seconds()
     hours, remainder = divmod(seconds, 3600)
     minutes = remainder // 60
-    return "{hours} hours {minutes} minutes".format(hours=int(hours), minutes=int(minutes))
+    if minutes == 0:
+        return "{hours} h".format(hours=int(hours))        
+    else:
+        return "{hours} h {minutes} m".format(hours=int(hours), minutes=int(minutes))
 
 
 def main():
