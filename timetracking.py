@@ -41,6 +41,12 @@ def calculate_time(event):
     end = event['DTEND'].dt
     return end - start
 
+def format_timedelta(delta):
+    seconds = delta.total_seconds()
+    hours, remainder = divmod(seconds, 3600)
+    minutes = remainder // 60
+    return "{hours} hours {minutes} minutes".format(hours=int(hours), minutes=int(minutes))
+
 
 def main():
     import argparse
@@ -57,7 +63,7 @@ def main():
         sys.stdout.write("= {activity} =\n".format(activity=file.split('.ics')[0]))
         projects = get_events_from_ics(ns.directory+"/"+file)
         for name, length in projects.iteritems():
-            sys.stdout.write("{name}: {length} h\n".format(name=name, length=length['total'].seconds//3600))
+            sys.stdout.write("{name}: {length}\n".format(name=name, length=format_timedelta(length['total'])))
 
     #sys.stdout.write(geojson_dumps(collection))
 
