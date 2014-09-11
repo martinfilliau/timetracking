@@ -5,7 +5,7 @@ from icalendar import Calendar
 
 
 def get_ics_files(directory):
-    """Get all files ending with .ics from a directory
+    """Get all filenames ending with .ics from a directory
     """
     ics = []
     for (dirpath, dirnames, filenames) in os.walk(directory):
@@ -17,6 +17,8 @@ def get_ics_files(directory):
 
 
 def get_events_from_ics(file):
+    """Get events from an ics file
+    """
     g = open(file,'r')
     cal = Calendar.from_ical(g.read())
     projects = {}
@@ -37,11 +39,17 @@ def get_events_from_ics(file):
 
 
 def calculate_time(event):
+    """Get timedelta from event, based on start/end date
+    """
     start = event['DTSTART'].dt
     end = event['DTEND'].dt
     return end - start
 
+
 def format_timedelta(delta):
+    """Format a timedelta object for human reading
+    (Only handles hours/minutes for now)
+    """
     seconds = delta.total_seconds()
     hours, remainder = divmod(seconds, 3600)
     minutes = remainder // 60
