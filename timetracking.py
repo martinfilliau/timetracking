@@ -22,10 +22,17 @@ def get_events_from_ics(file):
     projects = {}
     for e in cal.walk('vevent'):
         name = str(e['SUMMARY']).lower()
-        if name in projects:
-            projects[name] = projects[name] + calculate_time(e)
+        if '-' in name:
+            project_name = name.split('-')[0].strip()
+            task_name = name.split('-')[1].strip()
         else:
-            projects[name] = calculate_time(e)
+            project_name = name
+            task_name = None
+        if project_name in projects:
+            projects[project_name]['total'] = projects[project_name]['total'] + calculate_time(e)
+        else:
+            projects[project_name] = {}
+            projects[project_name]['total'] = calculate_time(e)
     return projects
 
 
@@ -50,7 +57,7 @@ def main():
         sys.stdout.write("= {activity} =\n".format(activity=file.split('.ics')[0]))
         projects = get_events_from_ics(ns.directory+"/"+file)
         for name, length in projects.iteritems():
-            sys.stdout.write("{name}: {length} h\n".format(name=name, length=length.seconds//3600))
+            sys.stdout.write("{name}: {length} h\n".format(name=name, length=length['total'].seconds//3600))
 
     #sys.stdout.write(geojson_dumps(collection))
 
