@@ -1,6 +1,6 @@
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from pytz import timezone
 from icalendar import Calendar
@@ -94,10 +94,14 @@ def main():
     files = get_ics_files(ns.directory)
 
     for file in files:
+        total_time_activity = timedelta()
         sys.stdout.write("= {activity} =\n".format(activity=file.split('.ics')[0]))
         projects = get_events_from_ics(ns.directory+"/"+file, from_date, to_date)
         for name, length in projects.iteritems():
-            sys.stdout.write("{name}: {length}\n".format(name=name, length=format_timedelta(length['total'])))
+            total_project = length['total']
+            total_time_activity += total_project
+            sys.stdout.write("{name}: {length}\n".format(name=name, length=format_timedelta(total_project)))
+        sys.stdout.write("> TOTAL: {length}\n".format(length=format_timedelta(total_time_activity)))
 
 
 if __name__ == '__main__':
