@@ -44,7 +44,6 @@ def main():
                         help="Output: {available_functions})".format(
                             available_functions=', '.join(OUTPUT.iterkeys())))
 
-
     args = parser.parse_args()
 
     if args.from_date and args.to_date:
