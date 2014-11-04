@@ -25,17 +25,19 @@ def get_events_from_ics(filepath, from_date, to_date):
     projects = {}
     for event in cal.walk('vevent'):
         if from_date and to_date:
-            if not within(event, from_date, to_date):
+            if not within(event['DTSTART'].dt, from_date, to_date):
                 continue
         name = str(event['SUMMARY']).lower()
         if '-' in name:
             project_name = name.split('-')[0].strip()
         else:
             project_name = name
+        event_start = event['DTSTART'].dt
+        event_end = event['DTEND'].dt
         if project_name in projects:
-            new_total = projects[project_name]['total'] + calculate_time(event)
+            new_total = projects[project_name]['total'] + calculate_time(event_start, event_end)
             projects[project_name]['total'] = new_total
         else:
             projects[project_name] = {}
-            projects[project_name]['total'] = calculate_time(event)
+            projects[project_name]['total'] = calculate_time(event_start, event_end)
     return projects
