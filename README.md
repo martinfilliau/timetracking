@@ -10,6 +10,6 @@ An ics file is identified as an activity (e.g. SysAdmin, Development, Meeting), 
 Example
 -------
 
-    python timetracking.py /home/martin/tt
+    python tt.py /home/martin/tt
 
 
