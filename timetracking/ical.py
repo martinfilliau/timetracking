@@ -1,3 +1,6 @@
+"""Handle iCalendars to our structure
+"""
+
 import os
 
 from icalendar import Calendar
@@ -34,10 +37,11 @@ def get_events_from_ics(filepath, from_date, to_date):
             project_name = name
         event_start = event['DTSTART'].dt
         event_end = event['DTEND'].dt
+        project_total = calculate_time(event_start, event_end)
         if project_name in projects:
-            new_total = projects[project_name]['total'] + calculate_time(event_start, event_end)
+            new_total = projects[project_name]['total'] + project_total
             projects[project_name]['total'] = new_total
         else:
             projects[project_name] = {}
-            projects[project_name]['total'] = calculate_time(event_start, event_end)
+            projects[project_name]['total'] = project_total
     return projects

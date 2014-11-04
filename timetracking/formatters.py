@@ -1,3 +1,6 @@
+"""Format "things" to strings
+"""
+
 from datetime import datetime
 
 

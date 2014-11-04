@@ -45,7 +45,8 @@ def main():
     ics_files = get_ics_files(args.directory)
     activities = {}
     for ics_file in ics_files:
-        projects = get_events_from_ics(args.directory+"/"+ics_file, from_date, to_date)
+        projects = get_events_from_ics(args.directory+"/"+ics_file,
+                                       from_date, to_date)
         activities[ics_file.split('.ics')[0]] = projects
 
     write(activities)

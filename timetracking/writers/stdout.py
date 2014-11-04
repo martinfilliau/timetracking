@@ -1,3 +1,6 @@
+"""Print our structures to stdout
+"""
+
 import sys
 from datetime import timedelta
 
@@ -5,9 +8,8 @@ from timetracking.formatters import format_timedelta
 
 
 def write(activities):
-    """
-    :param ics_files:
-    :return:
+    """Write activities to stdout
+    :param activities: dict structure
     """
     for activity in activities:
         total_time_activity = timedelta()
@@ -17,7 +19,8 @@ def write(activities):
         for name, length in projects.iteritems():
             total_project = length['total']
             total_time_activity += total_project
+            td_string = format_timedelta(total_project)
             sys.stdout.write("{name}: {length}\n".format(name=name,
-                                                         length=format_timedelta(total_project)))
+                                                         length=td_string))
         sys.stdout.write("> TOTAL: {length}\n".format(
             length=format_timedelta(total_time_activity)))
