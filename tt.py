@@ -5,7 +5,13 @@ from pytz import timezone
 
 from timetracking.formatters import date_from_string
 from timetracking.ical import get_ics_files, get_events_from_ics
-from timetracking.writers.stdout import write
+from timetracking.writers.stdout import write as txt_write
+from timetracking.writers.csv_output import write as csv_write
+
+OUTPUT = {
+    'TXT': txt_write,
+    'CSV': csv_write
+}
 
 
 def main():
@@ -31,6 +37,13 @@ def main():
                         dest='timezone',
                         help='Timezone',
                         default='Europe/London')
+    parser.add_argument('--output',
+                        action='store',
+                        dest='output',
+                        default='TXT',
+                        help="Output: {available_functions})".format(
+                            available_functions=', '.join(OUTPUT.iterkeys())))
+
 
     args = parser.parse_args()
 
@@ -49,7 +62,8 @@ def main():
                                        from_date, to_date)
         activities[ics_file.split('.ics')[0]] = projects
 
-    write(activities)
+    writer = OUTPUT.get(args.output)
+    writer(activities)
 
 
 if __name__ == '__main__':
