@@ -1,5 +1,4 @@
-timetracking
-============
+# timetracking
 
 [![Build Status](https://travis-ci.org/martinfilliau/timetracking.svg?branch=master)](https://travis-ci.org/martinfilliau/timetracking)
 
@@ -7,8 +6,7 @@ Track time from ics files
 
 An ics file is identified as an activity (e.g. SysAdmin, Development, Meeting), events are aggregated based on their names.
 
-Example
--------
+## Example
 
 The following command will analyse all the files ending with `.ics` in the `tt` directory:
 
@@ -33,3 +31,11 @@ It will produce the following output, assuming that we have calendars `SysAdmin.
     talks.ox: 0 h 30 m
     [...]
     > TOTAL: 23 h 45 m
+
+You can specify a start and end date to filter the calendars, for example:
+
+    python tt.py /home/martin/calendars 01/10/2014 31/10/2014
+
+`--output` lets you select if the output should be CSV or TXT
+
+    python tt.py /home/martin/calendars 01/10/2014 31/10/2014 --output CSV
