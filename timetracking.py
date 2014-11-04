@@ -1,3 +1,6 @@
+"""Functions to analyse events from calendars in iCalendar format
+"""
+
 import sys
 import os
 from datetime import datetime, timedelta
@@ -10,7 +13,7 @@ def get_ics_files(directory):
     """Get all filenames ending with .ics from a directory
     """
     ics = []
-    for (dirpath, dirnames, filenames) in os.walk(directory):
+    for (_, _, filenames) in os.walk(directory):
         for filename in filenames:
             if filename.endswith('.ics'):
                 ics.append(filename)
@@ -18,28 +21,27 @@ def get_ics_files(directory):
     return ics
 
 
-def get_events_from_ics(file, from_date, to_date):
+def get_events_from_ics(filepath, from_date, to_date):
     """Get events from an ics file
     """
-    g = open(file,'r')
-    cal = Calendar.from_ical(g.read())
+    ics_file = open(filepath, 'r')
+    cal = Calendar.from_ical(ics_file.read())
     projects = {}
-    for e in cal.walk('vevent'):
+    for event in cal.walk('vevent'):
         if from_date and to_date:
-            if not within(e, from_date, to_date):
+            if not within(event, from_date, to_date):
                 continue
-        name = str(e['SUMMARY']).lower()
+        name = str(event['SUMMARY']).lower()
         if '-' in name:
             project_name = name.split('-')[0].strip()
-            task_name = name.split('-')[1].strip()
         else:
             project_name = name
-            task_name = None
         if project_name in projects:
-            projects[project_name]['total'] = projects[project_name]['total'] + calculate_time(e)
+            new_total = projects[project_name]['total'] + calculate_time(event)
+            projects[project_name]['total'] = new_total
         else:
             projects[project_name] = {}
-            projects[project_name]['total'] = calculate_time(e)
+            projects[project_name]['total'] = calculate_time(event)
     return projects
 
 
@@ -50,7 +52,14 @@ def calculate_time(event):
     end = event['DTEND'].dt
     return end - start
 
+
 def within(event, from_date, to_date):
+    """Check if given vEvent is between two datetimes
+    :param event: vEvent (iCal)
+    :param from_date: date start
+    :param to_date: date end
+    :return True if vEvent is between the two dates else False
+    """
     return from_date < event['DTSTART'].dt < to_date
 
 
@@ -62,46 +71,69 @@ def format_timedelta(delta):
     hours, remainder = divmod(seconds, 3600)
     minutes = remainder // 60
     if minutes == 0:
-        return "{hours} h".format(hours=int(hours))        
+        return "{hours} h".format(hours=int(hours))
     else:
-        return "{hours} h {minutes} m".format(hours=int(hours), minutes=int(minutes))
+        return "{hours} h {minutes} m".format(hours=int(hours),
+                                              minutes=int(minutes))
 
 
-def mkdate(datestr):
+def date_from_string(date_string):
     """Date from string (input)
+    :param date_string: date as string
+    :return datetime object
     """
-    return datetime.strptime(datestr, '%d/%m/%Y')
+    return datetime.strptime(date_string, '%d/%m/%Y')
 
 
 def main():
+    """Main method
+    """
     import argparse
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('directory', action='store', help='Directory containing ics files')
-    parser.add_argument('from_date', type=mkdate, help='Date to start', nargs='?', default=None)
-    parser.add_argument('to_date', type=mkdate, help='Date to end', nargs='?', default=None)
-    parser.add_argument('--timezone', action='store', dest='timezone', help='Timezone', default='Europe/London')
+    parser.add_argument('directory',
+                        action='store',
+                        help='Directory containing ics files')
+    parser.add_argument('from_date',
+                        type=date_from_string,
+                        help='Date to start',
+                        nargs='?',
+                        default=None)
+    parser.add_argument('to_date',
+                        type=date_from_string,
+                        help='Date to end',
+                        nargs='?',
+                        default=None)
+    parser.add_argument('--timezone',
+                        action='store',
+                        dest='timezone',
+                        help='Timezone',
+                        default='Europe/London')
 
-    ns = parser.parse_args()
-    
-    if ns.from_date and ns.to_date:
-        t = timezone(ns.timezone)
-        from_date = t.localize(ns.from_date)
-        to_date = t.localize(ns.to_date)
+    args = parser.parse_args()
+
+    if args.from_date and args.to_date:
+        timez = timezone(args.timezone)
+        from_date = timez.localize(args.from_date)
+        to_date = timez.localize(args.to_date)
     else:
         from_date = None
         to_date = None
 
-    files = get_ics_files(ns.directory)
+    ics_files = get_ics_files(args.directory)
 
-    for file in files:
+    for ics_file in ics_files:
         total_time_activity = timedelta()
-        sys.stdout.write("= {activity} =\n".format(activity=file.split('.ics')[0]))
-        projects = get_events_from_ics(ns.directory+"/"+file, from_date, to_date)
+        sys.stdout.write("= {activity} =\n".format(
+            activity=ics_file.split('.ics')[0]))
+        projects = get_events_from_ics(args.directory+"/"+ics_file,
+                                       from_date, to_date)
         for name, length in projects.iteritems():
             total_project = length['total']
             total_time_activity += total_project
-            sys.stdout.write("{name}: {length}\n".format(name=name, length=format_timedelta(total_project)))
-        sys.stdout.write("> TOTAL: {length}\n".format(length=format_timedelta(total_time_activity)))
+            sys.stdout.write("{name}: {length}\n".format(name=name,
+                                                         length=format_timedelta(total_project)))
+        sys.stdout.write("> TOTAL: {length}\n".format(
+            length=format_timedelta(total_time_activity)))
 
 
 if __name__ == '__main__':
